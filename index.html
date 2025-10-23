@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>易经算卦</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif;
+            background: #f5f5f5;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* 64卦背景 */
+        .hexagram-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            opacity: 0.25;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .hexagram-item {
+            position: absolute;
+            font-size: 32px;
+            color: #667eea;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .hexagram-item.flashing {
+            animation: flash 0.5s infinite alternate;
+            opacity: 0.8;
+        }
+
+        @keyframes flash {
+            0% { opacity: 0.3; transform: scale(1); }
+            100% { opacity: 1; transform: scale(1.3); }
+        }
+
+        /* 主容器 */
+        .container {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        /* 标题 */
+        .title {
+            color: white;
+            font-size: 3rem;
+            font-weight: 300;
+            margin-bottom: 2rem;
+            text-align: center;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        /* 提问框容器 */
+        .question-container {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            width: 100%;
+            max-width: 600px;
+            margin-bottom: 2rem;
+        }
+
+        .question-input {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            transition: border-color 0.3s ease;
+            outline: none;
+        }
+
+        .question-input:focus {
+            border-color: #667eea;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 0.8rem 2rem;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: #f8f9fa;
+            color: #495057;
+            border: 2px solid #e0e0e0;
+        }
+
+        .btn-secondary:hover {
+            background: #e9ecef;
+            transform: translateY(-2px);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* 结果显示区域 */
+        .result-container {
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(25px) saturate(180%);
+            -webkit-backdrop-filter: blur(25px) saturate(180%);
+            border-radius: 25px;
+            padding: 2.5rem;
+            box-shadow: 0 25px 70px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            text-align: center;
+            opacity: 0;
+            transform: translateY(30px) scale(0.95);
+            transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+            max-width: 700px;
+            width: 100%;
+        }
+
+        .result-container.show {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+
+        /* 卦象展示区 */
+        .hexagram-display {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            margin-bottom: 2rem;
+            padding-bottom: 2rem;
+            border-bottom: 2px solid rgba(102, 126, 234, 0.1);
+        }
+
+        .hexagram-image {
+            width: 140px;
+            height: 140px;
+            flex-shrink: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 5rem;
+            color: white;
+            box-shadow: 0 15px 35px rgba(102, 126, 234, 0.3);
+            animation: hexagramGlow 2s ease-in-out infinite;
+        }
+
+        @keyframes hexagramGlow {
+            0%, 100% { box-shadow: 0 15px 35px rgba(102, 126, 234, 0.3); }
+            50% { box-shadow: 0 15px 45px rgba(102, 126, 234, 0.5); }
+        }
+
+        .hexagram-info {
+            flex: 1;
+            text-align: left;
+        }
+
+        .hexagram-name {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #495057;
+            margin-bottom: 0.8rem;
+            line-height: 1.3;
+        }
+
+        .hexagram-description {
+            color: #6c757d;
+            font-size: 1rem;
+            line-height: 1.6;
+            padding: 0.8rem 1rem;
+            background: rgba(102, 126, 234, 0.05);
+            border-radius: 10px;
+            border-left: 3px solid #667eea;
+        }
+
+        /* AI解卦结果 */
+        .ai-interpretation {
+            text-align: left;
+        }
+
+        .ai-interpretation-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        .ai-interpretation-title::before {
+            content: '';
+            width: 4px;
+            height: 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 2px;
+        }
+
+        .ai-interpretation-content {
+            color: #495057;
+            font-size: 1rem;
+            line-height: 1.9;
+            white-space: pre-wrap;
+            padding: 1.2rem;
+            background: rgba(248, 249, 250, 0.8);
+            border-radius: 15px;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .ai-loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.8rem;
+            color: #667eea;
+            font-size: 1rem;
+            padding: 2rem;
+        }
+
+        .loading-spinner {
+            width: 24px;
+            height: 24px;
+            border: 3px solid rgba(102, 126, 234, 0.2);
+            border-top-color: #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .ai-loading::after {
+            content: '正在为您解卦...';
+            animation: dots 1.5s infinite;
+        }
+
+        @keyframes dots {
+            0%, 33% { content: '正在为您解卦.'; }
+            34%, 66% { content: '正在为您解卦..'; }
+            67%, 100% { content: '正在为您解卦...'; }
+        }
+
+
+        /* 语音输入状态 */
+        .voice-recording {
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .title {
+                font-size: 2rem;
+            }
+            
+            .question-container {
+                padding: 1.5rem;
+            }
+            
+            .button-group {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .result-container {
+                padding: 1.5rem;
+            }
+
+            .hexagram-display {
+                flex-direction: column;
+                gap: 1.5rem;
+                text-align: center;
+            }
+
+            .hexagram-image {
+                width: 120px;
+                height: 120px;
+                font-size: 4rem;
+            }
+
+            .hexagram-info {
+                text-align: center;
+            }
+
+            .hexagram-name {
+                font-size: 1.5rem;
+            }
+
+            .hexagram-description {
+                font-size: 0.9rem;
+            }
+
+            .ai-interpretation-content {
+                font-size: 0.95rem;
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 64卦背景 -->
+    <div class="hexagram-background" id="hexagramBackground"></div>
+
+    <!-- 主容器 -->
+    <div class="container">
+        <h1 class="title">易经算卦</h1>
+        
+        <!-- 提问框 -->
+        <div class="question-container">
+            <input type="text" id="questionInput" class="question-input" placeholder="请输入您的问题...">
+            <div class="button-group">
+                <button id="voiceBtn" class="btn btn-secondary">
+                    <span>🎤</span>
+                    <span id="voiceText">语音输入</span>
+                </button>
+                <button id="sendBtn" class="btn btn-primary">
+                    <span>🔮</span>
+                    <span>开始算卦</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- 结果显示 -->
+        <div class="result-container" id="resultContainer">
+            <div class="hexagram-display">
+                <div class="hexagram-image" id="hexagramImage"></div>
+                <div class="hexagram-info">
+                    <div class="hexagram-name" id="hexagramName"></div>
+                    <div class="hexagram-description" id="hexagramDescription"></div>
+                </div>
+            </div>
+            <div class="ai-interpretation">
+                <div class="ai-interpretation-title">AI解卦</div>
+                <div class="ai-interpretation-content" id="aiInterpretationContent"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 64卦数据 - 根据周易六十四卦列表
+        // 卦象使用六爻表示法：☰乾(天) ☷坤(地) ☵坎(水) ☲离(火) ☳震(雷) ☴巽(风) ☶艮(山) ☱兑(泽)
+        const hexagrams = [
+            // 上经30卦
+            { name: '乾', fullName: '乾为天', symbol: '䷀', lines: '☰☰', description: '元亨利貞' },
+            { name: '坤', fullName: '坤为地', symbol: '䷁', lines: '☷☷', description: '元亨，利牝馬之貞' },
+            { name: '屯', fullName: '水雷屯', symbol: '䷂', lines: '☵☳', description: '元亨利貞，勿用有攸往' },
+            { name: '蒙', fullName: '山水蒙', symbol: '䷃', lines: '☶☵', description: '亨，匪我求童蒙，童蒙求我' },
+            { name: '需', fullName: '水天需', symbol: '䷄', lines: '☵☰', description: '有孚，光亨貞吉' },
+            { name: '讼', fullName: '天水讼', symbol: '䷅', lines: '☰☵', description: '有孚，窒惕，中吉，終凶' },
+            { name: '师', fullName: '地水师', symbol: '䷆', lines: '☷☵', description: '貞丈人吉，无咎' },
+            { name: '比', fullName: '水地比', symbol: '䷇', lines: '☵☷', description: '吉，原筮，元永貞，无咎' },
+            { name: '小畜', fullName: '风天小畜', symbol: '䷈', lines: '☴☰', description: '亨，密雲不雨，自我西郊' },
+            { name: '履', fullName: '天泽履', symbol: '䷉', lines: '☰☱', description: '履虎尾，不咥人，亨' },
+            { name: '泰', fullName: '地天泰', symbol: '䷊', lines: '☷☰', description: '小往大來，吉亨' },
+            { name: '否', fullName: '天地否', symbol: '䷋', lines: '☰☷', description: '否之匪人，不利君子貞' },
+            { name: '同人', fullName: '天火同人', symbol: '䷌', lines: '☰☲', description: '同人于野，亨' },
+            { name: '大有', fullName: '火天大有', symbol: '䷍', lines: '☲☰', description: '元亨' },
+            { name: '谦', fullName: '地山谦', symbol: '䷎', lines: '☷☶', description: '亨，君子有終' },
+            { name: '豫', fullName: '雷地豫', symbol: '䷏', lines: '☳☷', description: '利建侯行師' },
+            { name: '随', fullName: '泽雷随', symbol: '䷐', lines: '☱☳', description: '元亨利貞，无咎' },
+            { name: '蛊', fullName: '山风蛊', symbol: '䷑', lines: '☶☴', description: '元亨，利涉大川' },
+            { name: '临', fullName: '地泽临', symbol: '䷒', lines: '☷☱', description: '元亨利貞，至于八月有凶' },
+            { name: '观', fullName: '风地观', symbol: '䷓', lines: '☴☷', description: '盥而不薦，有孚顒若' },
+            { name: '噬嗑', fullName: '火雷噬嗑', symbol: '䷔', lines: '☲☳', description: '亨，利用獄' },
+            { name: '贲', fullName: '山火贲', symbol: '䷕', lines: '☶☲', description: '亨，小利有攸往' },
+            { name: '剥', fullName: '山地剥', symbol: '䷖', lines: '☶☷', description: '不利有攸往' },
+            { name: '复', fullName: '地雷复', symbol: '䷗', lines: '☷☳', description: '亨，出入无疾，朋來无咎' },
+            { name: '无妄', fullName: '天雷无妄', symbol: '䷘', lines: '☰☳', description: '元亨利貞，其匪正有眚' },
+            { name: '大畜', fullName: '山天大畜', symbol: '䷙', lines: '☶☰', description: '利貞，不家食吉' },
+            { name: '颐', fullName: '山雷颐', symbol: '䷚', lines: '☶☳', description: '貞吉，觀頤，自求口實' },
+            { name: '大过', fullName: '泽风大过', symbol: '䷛', lines: '☱☴', description: '棟橈，利有攸往，亨' },
+            { name: '坎', fullName: '坎为水', symbol: '䷜', lines: '☵☵', description: '習坎，有孚維心亨' },
+            { name: '离', fullName: '离为火', symbol: '䷝', lines: '☲☲', description: '利貞亨，畜牝牛吉' },
+            // 下经34卦
+            { name: '咸', fullName: '泽山咸', symbol: '䷞', lines: '☱☶', description: '亨利貞，取女吉' },
+            { name: '恒', fullName: '雷风恒', symbol: '䷟', lines: '☳☴', description: '亨无咎，利貞，利有攸往' },
+            { name: '遁', fullName: '天山遁', symbol: '䷠', lines: '☰☶', description: '亨，小利貞' },
+            { name: '大壮', fullName: '雷天大壮', symbol: '䷡', lines: '☳☰', description: '利貞' },
+            { name: '晋', fullName: '火地晋', symbol: '䷢', lines: '☲☷', description: '康侯用錫馬蕃庶' },
+            { name: '明夷', fullName: '地火明夷', symbol: '䷣', lines: '☷☲', description: '利艱貞' },
+            { name: '家人', fullName: '风火家人', symbol: '䷤', lines: '☴☲', description: '利女貞' },
+            { name: '睽', fullName: '火泽睽', symbol: '䷥', lines: '☲☱', description: '小事吉' },
+            { name: '蹇', fullName: '水山蹇', symbol: '䷦', lines: '☵☶', description: '利西南，不利東北' },
+            { name: '解', fullName: '雷水解', symbol: '䷧', lines: '☳☵', description: '利西南，无所往，其來復吉' },
+            { name: '损', fullName: '山泽损', symbol: '䷨', lines: '☶☱', description: '有孚，元吉，无咎' },
+            { name: '益', fullName: '风雷益', symbol: '䷩', lines: '☴☳', description: '利有攸往，利涉大川' },
+            { name: '夬', fullName: '泽天夬', symbol: '䷪', lines: '☱☰', description: '揚于王庭，孚號有厲' },
+            { name: '姤', fullName: '天风姤', symbol: '䷫', lines: '☰☴', description: '女壯，勿用取女' },
+            { name: '萃', fullName: '泽地萃', symbol: '䷬', lines: '☱☷', description: '亨，王假有廟' },
+            { name: '升', fullName: '地风升', symbol: '䷭', lines: '☷☴', description: '元亨，用見大人' },
+            { name: '困', fullName: '泽水困', symbol: '䷮', lines: '☱☵', description: '亨貞，大人吉，无咎' },
+            { name: '井', fullName: '水风井', symbol: '䷯', lines: '☵☴', description: '改邑不改井，无喪无得' },
+            { name: '革', fullName: '泽火革', symbol: '䷰', lines: '☱☲', description: '己日乃孚，元亨利貞' },
+            { name: '鼎', fullName: '火风鼎', symbol: '䷱', lines: '☲☴', description: '元吉亨' },
+            { name: '震', fullName: '震为雷', symbol: '䷲', lines: '☳☳', description: '亨，震來虩虩' },
+            { name: '艮', fullName: '艮为山', symbol: '䷳', lines: '☶☶', description: '艮其背，不獲其身' },
+            { name: '渐', fullName: '风山渐', symbol: '䷴', lines: '☴☶', description: '女歸吉，利貞' },
+            { name: '归妹', fullName: '雷泽归妹', symbol: '䷵', lines: '☳☱', description: '征凶，无攸利' },
+            { name: '丰', fullName: '雷火丰', symbol: '䷶', lines: '☳☲', description: '亨，王假之' },
+            { name: '旅', fullName: '火山旅', symbol: '䷷', lines: '☲☶', description: '小亨，旅貞吉' },
+            { name: '巽', fullName: '巽为风', symbol: '䷸', lines: '☴☴', description: '小亨，利有攸往' },
+            { name: '兑', fullName: '兑为泽', symbol: '䷹', lines: '☱☱', description: '亨利貞' },
+            { name: '涣', fullName: '风水涣', symbol: '䷺', lines: '☴☵', description: '亨，王假有廟' },
+            { name: '节', fullName: '水泽节', symbol: '䷻', lines: '☵☱', description: '亨，苦節不可貞' },
+            { name: '中孚', fullName: '风泽中孚', symbol: '䷼', lines: '☴☱', description: '豚魚吉，利涉大川' },
+            { name: '小过', fullName: '雷山小过', symbol: '䷽', lines: '☳☶', description: '亨利貞，可小事' },
+            { name: '既济', fullName: '水火既济', symbol: '䷾', lines: '☵☲', description: '亨小，利貞' },
+            { name: '未济', fullName: '火水未济', symbol: '䷿', lines: '☲☵', description: '亨，小狐汔濟' }
+        ];
+
+        // DOM元素
+        const questionInput = document.getElementById('questionInput');
+        const voiceBtn = document.getElementById('voiceBtn');
+        const voiceText = document.getElementById('voiceText');
+        const sendBtn = document.getElementById('sendBtn');
+        const resultContainer = document.getElementById('resultContainer');
+        const hexagramImage = document.getElementById('hexagramImage');
+        const hexagramName = document.getElementById('hexagramName');
+        const hexagramDescription = document.getElementById('hexagramDescription');
+        const hexagramBackground = document.getElementById('hexagramBackground');
+        const aiInterpretationContent = document.getElementById('aiInterpretationContent');
+
+        // 语音识别
+        let recognition = null;
+        let isRecording = false;
+
+        // API配置
+        let apiKey = 'sk-jitntevrbtbglohuhxidentnldaxkwvwpcwptlbgchodcbhc';
+        let currentQuestion = '';
+        let currentHexagram = null;
+        let flashingInterval = null;
+
+        // 初始化语音识别
+        function initSpeechRecognition() {
+            if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                recognition = new SpeechRecognition();
+                recognition.lang = 'zh-CN';
+                recognition.continuous = false;
+                recognition.interimResults = false;
+
+                recognition.onstart = function() {
+                    isRecording = true;
+                    voiceText.textContent = '正在听...';
+                    voiceBtn.classList.add('voice-recording');
+                };
+
+                recognition.onresult = function(event) {
+                    const transcript = event.results[0][0].transcript;
+                    questionInput.value = transcript;
+                };
+
+                recognition.onend = function() {
+                    isRecording = false;
+                    voiceText.textContent = '语音输入';
+                    voiceBtn.classList.remove('voice-recording');
+                };
+
+                recognition.onerror = function(event) {
+                    console.error('语音识别错误:', event.error);
+                    isRecording = false;
+                    voiceText.textContent = '语音输入';
+                    voiceBtn.classList.remove('voice-recording');
+                };
+            } else {
+                voiceBtn.style.display = 'none';
+            }
+        }
+
+        // 创建64卦背景 - 随机铺满屏幕
+        function createHexagramBackground() {
+            hexagramBackground.innerHTML = '';
+            
+            // 计算屏幕尺寸
+            const screenWidth = window.innerWidth;
+            const screenHeight = window.innerHeight;
+            
+            // 计算需要的卦象数量（铺满屏幕，增加密度）
+            const itemSize = 80;
+            const cols = Math.ceil(screenWidth / itemSize) + 2;
+            const rows = Math.ceil(screenHeight / itemSize) + 2;
+            const totalItems = cols * rows;
+            
+            // 创建卦象数组，循环使用64卦直到铺满屏幕
+            const hexagramArray = [];
+            for (let i = 0; i < totalItems; i++) {
+                hexagramArray.push(hexagrams[i % 64]);
+            }
+            
+            // 随机打乱数组
+            for (let i = hexagramArray.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [hexagramArray[i], hexagramArray[j]] = [hexagramArray[j], hexagramArray[i]];
+            }
+            
+            // 创建卦象元素
+            for (let i = 0; i < totalItems; i++) {
+                const hexagramItem = document.createElement('div');
+                hexagramItem.className = 'hexagram-item';
+                
+                // 随机位置（带一些偏移让布局不那么规则）
+                const colIndex = i % cols;
+                const rowIndex = Math.floor(i / cols);
+                const x = colIndex * itemSize + Math.random() * 30 - 15;
+                const y = rowIndex * itemSize + Math.random() * 30 - 15;
+                
+                hexagramItem.style.left = x + 'px';
+                hexagramItem.style.top = y + 'px';
+                
+                // 随机旋转角度
+                const rotation = Math.random() * 360;
+                hexagramItem.style.transform = `rotate(${rotation}deg)`;
+                
+                // 随机透明度
+                const opacity = 0.2 + Math.random() * 0.3;
+                hexagramItem.style.opacity = opacity;
+                
+                // 随机字体大小
+                const fontSize = 28 + Math.random() * 20;
+                hexagramItem.style.fontSize = fontSize + 'px';
+                
+                // 设置六爻卦象符号
+                hexagramItem.textContent = hexagramArray[i].symbol;
+                // 添加悬停提示，显示完整卦名
+                hexagramItem.title = `${hexagramArray[i].name}卦 · ${hexagramArray[i].fullName}`;
+                
+                hexagramBackground.appendChild(hexagramItem);
+            }
+        }
+
+        // 开始背景闪烁效果
+        function startFlashing() {
+            const items = document.querySelectorAll('.hexagram-item');
+            flashingInterval = setInterval(() => {
+                // 随机选择一些卦进行闪烁
+                items.forEach(item => {
+                    if (Math.random() < 0.3) {
+                        item.classList.add('flashing');
+                    } else {
+                        item.classList.remove('flashing');
+                    }
+                });
+            }, 200);
+        }
+
+        // 停止背景闪烁效果
+        function stopFlashing() {
+            if (flashingInterval) {
+                clearInterval(flashingInterval);
+                flashingInterval = null;
+                const items = document.querySelectorAll('.hexagram-item');
+                items.forEach(item => {
+                    item.classList.remove('flashing');
+                });
+            }
+        }
+
+        // 随机选择一个卦象（不显示）
+        function selectRandomHexagram() {
+            const randomIndex = Math.floor(Math.random() * hexagrams.length);
+            return hexagrams[randomIndex];
+        }
+
+        // 显示卦象和AI解卦结果
+        function showResult(hexagram, aiResult) {
+            // 停止背景闪烁
+            stopFlashing();
+            
+            // 填充卦象信息
+            hexagramImage.textContent = hexagram.symbol;
+            hexagramName.textContent = `${hexagram.name}卦 · ${hexagram.fullName}`;
+            hexagramDescription.textContent = hexagram.description;
+            
+            // 填充AI解卦结果
+            aiInterpretationContent.textContent = aiResult;
+            
+            // 显示结果容器
+            resultContainer.classList.add('show');
+            
+            // 重新启用按钮
+            sendBtn.disabled = false;
+            sendBtn.innerHTML = '<span>🔮</span><span>开始算卦</span>';
+        }
+
+        // 调用AI进行解卦
+        async function getAIInterpretation(question, hexagram) {
+            try {
+                const prompt = `你是一位精通易经的算卦大师。有人问："${question}"，抽到了${hexagram.fullName}（${hexagram.name}卦）。
+
+卦辞：${hexagram.description}
+
+请按以下结构回答（严格控制在150字以内）：
+1. 第一段（50字左右）：用通俗语言解释这个卦的核心含义
+2. 第二段（100字左右）：针对用户的问题给出分析和建议
+
+要求：
+- 语言要通俗易懂，像朋友聊天
+- 不要用"根据卦象"等套话
+- 直接、实用、有针对性
+
+直接开始回答：`;
+
+                const response = await fetch('https://api.siliconflow.cn/v1/chat/completions', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${apiKey}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        model: 'Qwen/Qwen3-8B',
+                        messages: [
+                            {
+                                role: 'user',
+                                content: prompt
+                            }
+                        ],
+                        temperature: 0.7,
+                        max_tokens: 300
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error?.message || '请求失败');
+                }
+
+                const data = await response.json();
+                return data.choices[0].message.content;
+            } catch (error) {
+                console.error('AI解卦错误:', error);
+                return `AI解卦遇到了一些问题：${error.message}\n\n不过不用担心，您抽到的"${hexagram.fullName}"本身就蕴含深意。建议您可以参考卦辞，结合自己的情况进行思考。如需重试，请刷新页面后重新算卦。`;
+            }
+        }
+
+        // 重置结果
+        function resetResult() {
+            resultContainer.classList.remove('show');
+            aiInterpretationContent.textContent = '';
+            hexagramImage.textContent = '';
+            hexagramName.textContent = '';
+            hexagramDescription.textContent = '';
+        }
+
+        // 事件监听
+        voiceBtn.addEventListener('click', function() {
+            if (!recognition) return;
+            
+            if (isRecording) {
+                recognition.stop();
+            } else {
+                recognition.start();
+            }
+        });
+
+        sendBtn.addEventListener('click', async function() {
+            const question = questionInput.value.trim();
+            if (!question) {
+                alert('请输入您的问题');
+                return;
+            }
+
+            // 保存当前问题
+            currentQuestion = question;
+
+            // 禁用按钮
+            sendBtn.disabled = true;
+            sendBtn.innerHTML = '<span>🔮</span><span>AI解卦中...</span>';
+
+            // 重置结果
+            resetResult();
+
+            // 立即随机选择一个卦象（不显示）
+            const selectedHexagram = selectRandomHexagram();
+            currentHexagram = selectedHexagram;
+
+            // 开始背景闪烁动画
+            startFlashing();
+
+            // 在AI解卦内容区域显示加载动画（提前准备结果容器但不显示）
+            aiInterpretationContent.innerHTML = '<div class="ai-loading"><div class="loading-spinner"></div></div>';
+
+            // 调用AI进行解卦（异步，等待结果）
+            const aiResult = await getAIInterpretation(question, selectedHexagram);
+
+            // AI完成后，显示卦象和解卦结果
+            showResult(selectedHexagram, aiResult);
+        });
+
+        // 回车键发送
+        questionInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendBtn.click();
+            }
+        });
+
+        // 窗口大小变化时重新布局
+        window.addEventListener('resize', function() {
+            createHexagramBackground();
+        });
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            initSpeechRecognition();
+            createHexagramBackground();
+        });
+    </script>
+</body>
+</html>
