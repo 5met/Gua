@@ -3,359 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>易经算卦</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif;
-            background: #f5f5f5;
-            min-height: 100vh;
-            overflow-x: hidden;
-            position: relative;
-        }
-
-        /* 64卦背景 */
-        .hexagram-background {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 1;
-            opacity: 0.25;
-            pointer-events: none;
-            overflow: hidden;
-        }
-
-        .hexagram-item {
-            position: absolute;
-            font-size: 32px;
-            color: #667eea;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .hexagram-item.flashing {
-            animation: flash 0.5s infinite alternate;
-            opacity: 0.8;
-        }
-
-        @keyframes flash {
-            0% { opacity: 0.3; transform: scale(1); }
-            100% { opacity: 1; transform: scale(1.3); }
-        }
-
-        /* 主容器 */
-        .container {
-            position: relative;
-            z-index: 10;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            padding: 20px;
-        }
-
-        /* 标题 */
-        .title {
-            color: white;
-            font-size: 3rem;
-            font-weight: 300;
-            margin-bottom: 2rem;
-            text-align: center;
-            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
-        }
-
-        /* 提问框容器 */
-        .question-container {
-            background: rgba(255, 255, 255, 0.7);
-            backdrop-filter: blur(20px) saturate(180%);
-            -webkit-backdrop-filter: blur(20px) saturate(180%);
-            border-radius: 20px;
-            padding: 2rem;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
-            border: 1px solid rgba(255, 255, 255, 0.5);
-            width: 100%;
-            max-width: 600px;
-            margin-bottom: 2rem;
-        }
-
-        .question-input {
-            width: 100%;
-            padding: 1rem;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            font-size: 1.1rem;
-            margin-bottom: 1rem;
-            transition: border-color 0.3s ease;
-            outline: none;
-        }
-
-        .question-input:focus {
-            border-color: #667eea;
-        }
-
-        .button-group {
-            display: flex;
-            gap: 1rem;
-            justify-content: center;
-        }
-
-        .btn {
-            padding: 0.8rem 2rem;
-            border: none;
-            border-radius: 10px;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
-        }
-
-        .btn-secondary {
-            background: #f8f9fa;
-            color: #495057;
-            border: 2px solid #e0e0e0;
-        }
-
-        .btn-secondary:hover {
-            background: #e9ecef;
-            transform: translateY(-2px);
-        }
-
-        .btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        /* 结果显示区域 */
-        .result-container {
-            background: rgba(255, 255, 255, 0.75);
-            backdrop-filter: blur(25px) saturate(180%);
-            -webkit-backdrop-filter: blur(25px) saturate(180%);
-            border-radius: 25px;
-            padding: 2.5rem;
-            box-shadow: 0 25px 70px rgba(0, 0, 0, 0.2);
-            border: 1px solid rgba(255, 255, 255, 0.6);
-            text-align: center;
-            opacity: 0;
-            transform: translateY(30px) scale(0.95);
-            transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
-            max-width: 700px;
-            width: 100%;
-        }
-
-        .result-container.show {
-            opacity: 1;
-            transform: translateY(0) scale(1);
-        }
-
-        /* 卦象展示区 */
-        .hexagram-display {
-            display: flex;
-            align-items: center;
-            gap: 2rem;
-            margin-bottom: 2rem;
-            padding-bottom: 2rem;
-            border-bottom: 2px solid rgba(102, 126, 234, 0.1);
-        }
-
-        .hexagram-image {
-            width: 140px;
-            height: 140px;
-            flex-shrink: 0;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 5rem;
-            color: white;
-            box-shadow: 0 15px 35px rgba(102, 126, 234, 0.3);
-            animation: hexagramGlow 2s ease-in-out infinite;
-        }
-
-        @keyframes hexagramGlow {
-            0%, 100% { box-shadow: 0 15px 35px rgba(102, 126, 234, 0.3); }
-            50% { box-shadow: 0 15px 45px rgba(102, 126, 234, 0.5); }
-        }
-
-        .hexagram-info {
-            flex: 1;
-            text-align: left;
-        }
-
-        .hexagram-name {
-            font-size: 1.8rem;
-            font-weight: 700;
-            color: #495057;
-            margin-bottom: 0.8rem;
-            line-height: 1.3;
-        }
-
-        .hexagram-description {
-            color: #6c757d;
-            font-size: 1rem;
-            line-height: 1.6;
-            padding: 0.8rem 1rem;
-            background: rgba(102, 126, 234, 0.05);
-            border-radius: 10px;
-            border-left: 3px solid #667eea;
-        }
-
-        /* AI解卦结果 */
-        .ai-interpretation {
-            text-align: left;
-        }
-
-        .ai-interpretation-title {
-            font-size: 1.2rem;
-            font-weight: 700;
-            color: #667eea;
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.6rem;
-        }
-
-        .ai-interpretation-title::before {
-            content: '';
-            width: 4px;
-            height: 24px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 2px;
-        }
-
-        .ai-interpretation-content {
-            color: #495057;
-            font-size: 1rem;
-            line-height: 1.9;
-            white-space: pre-wrap;
-            padding: 1.2rem;
-            background: rgba(248, 249, 250, 0.8);
-            border-radius: 15px;
-            border: 1px solid rgba(0, 0, 0, 0.05);
-        }
-
-        .ai-loading {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.8rem;
-            color: #667eea;
-            font-size: 1rem;
-            padding: 2rem;
-        }
-
-        .loading-spinner {
-            width: 24px;
-            height: 24px;
-            border: 3px solid rgba(102, 126, 234, 0.2);
-            border-top-color: #667eea;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        .ai-loading::after {
-            content: '正在为您解卦...';
-            animation: dots 1.5s infinite;
-        }
-
-        @keyframes dots {
-            0%, 33% { content: '正在为您解卦.'; }
-            34%, 66% { content: '正在为您解卦..'; }
-            67%, 100% { content: '正在为您解卦...'; }
-        }
-
-
-        /* 语音输入状态 */
-        .voice-recording {
-            animation: pulse 1s infinite;
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
-        }
-
-        /* 响应式设计 */
-        @media (max-width: 768px) {
-            .title {
-                font-size: 2rem;
-            }
-            
-            .question-container {
-                padding: 1.5rem;
-            }
-            
-            .button-group {
-                flex-direction: column;
-            }
-            
-            .btn {
-                width: 100%;
-                justify-content: center;
-            }
-
-            .result-container {
-                padding: 1.5rem;
-            }
-
-            .hexagram-display {
-                flex-direction: column;
-                gap: 1.5rem;
-                text-align: center;
-            }
-
-            .hexagram-image {
-                width: 120px;
-                height: 120px;
-                font-size: 4rem;
-            }
-
-            .hexagram-info {
-                text-align: center;
-            }
-
-            .hexagram-name {
-                font-size: 1.5rem;
-            }
-
-            .hexagram-description {
-                font-size: 0.9rem;
-            }
-
-            .ai-interpretation-content {
-                font-size: 0.95rem;
-                padding: 1rem;
-            }
-        }
-    </style>
+    <title>易经起卦</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <!-- 64卦背景 -->
@@ -363,35 +12,33 @@
 
     <!-- 主容器 -->
     <div class="container">
-        <h1 class="title">易经算卦</h1>
-        
-        <!-- 提问框 -->
-        <div class="question-container">
-            <input type="text" id="questionInput" class="question-input" placeholder="请输入您的问题...">
-            <div class="button-group">
-                <button id="voiceBtn" class="btn btn-secondary">
-                    <span>🎤</span>
-                    <span id="voiceText">语音输入</span>
-                </button>
-                <button id="sendBtn" class="btn btn-primary">
-                    <span>🔮</span>
-                    <span>开始算卦</span>
-                </button>
-            </div>
-        </div>
-
-        <!-- 结果显示 -->
-        <div class="result-container" id="resultContainer">
-            <div class="hexagram-display">
-                <div class="hexagram-image" id="hexagramImage"></div>
-                <div class="hexagram-info">
-                    <div class="hexagram-name" id="hexagramName"></div>
-                    <div class="hexagram-description" id="hexagramDescription"></div>
+        <!-- 提问框卡片 -->
+        <div class="liquidGlass-wrapper question-container">
+            <div class="liquidGlass-effect"></div>
+            <div class="liquidGlass-tint"></div>
+            <div class="liquidGlass-shine"></div>
+            <div class="liquidGlass-text">
+                <!-- 输入区域 -->
+                <div class="input-with-button">
+                    <input type="text" id="questionInput" class="question-input" placeholder="请输入您的问题...">
+                    <button id="sendBtn" class="btn btn-primary">起卦</button>
                 </div>
-            </div>
-            <div class="ai-interpretation">
-                <div class="ai-interpretation-title">AI解卦</div>
-                <div class="ai-interpretation-content" id="aiInterpretationContent"></div>
+
+                <!-- 结果显示区域（折叠在提问框内） -->
+                <div class="result-container" id="resultContainer">
+                    <div class="result-divider"></div>
+                    <div class="hexagram-display">
+                        <div class="hexagram-image" id="hexagramImage"></div>
+                        <div class="hexagram-info">
+                            <div class="hexagram-name" id="hexagramName"></div>
+                            <div class="hexagram-description" id="hexagramDescription"></div>
+                        </div>
+                    </div>
+                    <div class="ai-interpretation">
+                        <div class="ai-interpretation-title">AI解卦</div>
+                        <div class="ai-interpretation-content" id="aiInterpretationContent"></div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -470,8 +117,6 @@
 
         // DOM元素
         const questionInput = document.getElementById('questionInput');
-        const voiceBtn = document.getElementById('voiceBtn');
-        const voiceText = document.getElementById('voiceText');
         const sendBtn = document.getElementById('sendBtn');
         const resultContainer = document.getElementById('resultContainer');
         const hexagramImage = document.getElementById('hexagramImage');
@@ -480,52 +125,11 @@
         const hexagramBackground = document.getElementById('hexagramBackground');
         const aiInterpretationContent = document.getElementById('aiInterpretationContent');
 
-        // 语音识别
-        let recognition = null;
-        let isRecording = false;
-
         // API配置
         let apiKey = 'sk-jitntevrbtbglohuhxidentnldaxkwvwpcwptlbgchodcbhc';
         let currentQuestion = '';
         let currentHexagram = null;
         let flashingInterval = null;
-
-        // 初始化语音识别
-        function initSpeechRecognition() {
-            if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-                recognition = new SpeechRecognition();
-                recognition.lang = 'zh-CN';
-                recognition.continuous = false;
-                recognition.interimResults = false;
-
-                recognition.onstart = function() {
-                    isRecording = true;
-                    voiceText.textContent = '正在听...';
-                    voiceBtn.classList.add('voice-recording');
-                };
-
-                recognition.onresult = function(event) {
-                    const transcript = event.results[0][0].transcript;
-                    questionInput.value = transcript;
-                };
-
-                recognition.onend = function() {
-                    isRecording = false;
-                    voiceText.textContent = '语音输入';
-                    voiceBtn.classList.remove('voice-recording');
-                };
-
-                recognition.onerror = function(event) {
-                    console.error('语音识别错误:', event.error);
-                    isRecording = false;
-                    voiceText.textContent = '语音输入';
-                    voiceBtn.classList.remove('voice-recording');
-                };
-            } else {
-                voiceBtn.style.display = 'none';
-            }
-        }
 
         // 创建64卦背景 - 随机铺满屏幕
         function createHexagramBackground() {
@@ -536,7 +140,7 @@
             const screenHeight = window.innerHeight;
             
             // 计算需要的卦象数量（铺满屏幕，增加密度）
-            const itemSize = 80;
+            const itemSize = 90;
             const cols = Math.ceil(screenWidth / itemSize) + 2;
             const rows = Math.ceil(screenHeight / itemSize) + 2;
             const totalItems = cols * rows;
@@ -576,7 +180,7 @@
                 hexagramItem.style.opacity = opacity;
                 
                 // 随机字体大小
-                const fontSize = 28 + Math.random() * 20;
+                const fontSize = 36 + Math.random() * 24;
                 hexagramItem.style.fontSize = fontSize + 'px';
                 
                 // 设置六爻卦象符号
@@ -639,13 +243,13 @@
             
             // 重新启用按钮
             sendBtn.disabled = false;
-            sendBtn.innerHTML = '<span>🔮</span><span>开始算卦</span>';
+            sendBtn.textContent = '起卦';
         }
 
         // 调用AI进行解卦
         async function getAIInterpretation(question, hexagram) {
             try {
-                const prompt = `你是一位精通易经的算卦大师。有人问："${question}"，抽到了${hexagram.fullName}（${hexagram.name}卦）。
+                const prompt = `你是一位精通易经的起卦大师。有人问："${question}"，抽到了${hexagram.fullName}（${hexagram.name}卦）。
 
 卦辞：${hexagram.description}
 
@@ -688,7 +292,7 @@
                 return data.choices[0].message.content;
             } catch (error) {
                 console.error('AI解卦错误:', error);
-                return `AI解卦遇到了一些问题：${error.message}\n\n不过不用担心，您抽到的"${hexagram.fullName}"本身就蕴含深意。建议您可以参考卦辞，结合自己的情况进行思考。如需重试，请刷新页面后重新算卦。`;
+                return `AI解卦遇到了一些问题：${error.message}\n\n不过不用担心，您抽到的"${hexagram.fullName}"本身就蕴含深意。建议您可以参考卦辞，结合自己的情况进行思考。如需重试，请刷新页面后重新起卦。`;
             }
         }
 
@@ -702,16 +306,6 @@
         }
 
         // 事件监听
-        voiceBtn.addEventListener('click', function() {
-            if (!recognition) return;
-            
-            if (isRecording) {
-                recognition.stop();
-            } else {
-                recognition.start();
-            }
-        });
-
         sendBtn.addEventListener('click', async function() {
             const question = questionInput.value.trim();
             if (!question) {
@@ -724,7 +318,7 @@
 
             // 禁用按钮
             sendBtn.disabled = true;
-            sendBtn.innerHTML = '<span>🔮</span><span>AI解卦中...</span>';
+            sendBtn.textContent = '解卦中...';
 
             // 重置结果
             resetResult();
@@ -760,9 +354,65 @@
 
         // 初始化
         document.addEventListener('DOMContentLoaded', function() {
-            initSpeechRecognition();
             createHexagramBackground();
         });
     </script>
+
+    <!-- SVG滤镜：液态玻璃扭曲效果 -->
+    <svg style="display: none">
+        <filter
+            id="glass-distortion"
+            x="0%"
+            y="0%"
+            width="100%"
+            height="100%"
+            filterUnits="objectBoundingBox"
+        >
+            <feTurbulence
+                type="fractalNoise"
+                baseFrequency="0.01 0.01"
+                numOctaves="1"
+                seed="5"
+                result="turbulence"
+            />
+
+            <feComponentTransfer in="turbulence" result="mapped">
+                <feFuncR type="gamma" amplitude="1" exponent="10" offset="0.5" />
+                <feFuncG type="gamma" amplitude="0" exponent="1" offset="0" />
+                <feFuncB type="gamma" amplitude="0" exponent="1" offset="0.5" />
+            </feComponentTransfer>
+
+            <feGaussianBlur in="turbulence" stdDeviation="3" result="softMap" />
+
+            <feSpecularLighting
+                in="softMap"
+                surfaceScale="5"
+                specularConstant="1"
+                specularExponent="100"
+                lighting-color="white"
+                result="specLight"
+            >
+                <fePointLight x="-200" y="-200" z="300" />
+            </feSpecularLighting>
+
+            <feComposite
+                in="specLight"
+                operator="arithmetic"
+                k1="0"
+                k2="1"
+                k3="1"
+                k4="0"
+                result="litImage"
+            />
+
+            <feDisplacementMap
+                in="SourceGraphic"
+                in2="softMap"
+                scale="150"
+                xChannelSelector="R"
+                yChannelSelector="G"
+            />
+        </filter>
+    </svg>
 </body>
 </html>
