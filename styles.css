@@ -8,9 +8,9 @@
 }
 
 html {
-  -webkit-text-size-adjust: 100%;
-  -webkit-tap-highlight-color: transparent;
-  scroll-behavior: smooth;
+  overflow-x: hidden;
+  width: 100%;
+  max-width: 100vw;
 }
 
 body {
@@ -21,12 +21,16 @@ body {
   align-items: center;
   justify-content: center;
   min-height: 100vh;
+  min-height: 100dvh; /* 移动端动态视口高度 */
   background: linear-gradient(180deg, #0f0f14 0%, #18181f 50%, #1f1f28 100%);
+  background-attachment: fixed;
   overflow-x: hidden;
   position: relative;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   color: #18181b;
+  width: 100%;
+  max-width: 100vw;
 }
 
 /* 64卦背景 */
@@ -34,8 +38,9 @@ body {
   position: fixed;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
   z-index: 1;
   opacity: 0.25;
   pointer-events: none;
@@ -82,7 +87,10 @@ body {
   align-items: center;
   justify-content: center;
   min-height: 100vh;
+  min-height: 100dvh;
   padding: 40px 20px;
+  width: 100%;
+  max-width: 100vw;
 }
 
 /* 卡片通用样式 - 渐变毛玻璃效果 */
@@ -135,6 +143,7 @@ body {
   width: 720px;
   max-width: calc(100vw - 40px);
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  box-sizing: border-box;
 }
 
 /* 输入框和按钮整合布局 */
@@ -144,11 +153,13 @@ body {
   gap: 12px;
   width: 100%;
   min-width: 0;
+  max-width: 100%;
 }
 
 .question-input {
   flex: 1;
   min-width: 0;
+  max-width: 100%;
   padding: 12px 16px;
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 8px;
@@ -160,9 +171,6 @@ body {
   color: #ffffff;
   font-family: inherit;
   backdrop-filter: blur(5px);
-  -webkit-appearance: none;
-  -webkit-tap-highlight-color: transparent;
-  touch-action: manipulation;
 }
 
 .question-input::placeholder {
@@ -198,10 +206,6 @@ body {
   white-space: nowrap;
   flex-shrink: 0;
   line-height: 1.5;
-  -webkit-tap-highlight-color: transparent;
-  touch-action: manipulation;
-  user-select: none;
-  -webkit-user-select: none;
 }
 
 .btn-primary {
@@ -404,63 +408,70 @@ body {
   67%, 100% { content: '正在为您解卦...'; }
 }
 
-/* 响应式设计 - 移动端优化 */
+/* 响应式设计 */
 @media (max-width: 768px) {
   body {
     padding: 0;
+    align-items: flex-start;
   }
 
   .container {
     padding: 20px 16px;
-    min-height: 100vh;
+    min-height: auto;
+    justify-content: flex-start;
   }
 
-  /* 保持卡片宽度一致性 */
   .question-container {
     padding: 14px;
-    width: 720px;
-    max-width: calc(100vw - 32px);
+    width: 100%;
+    max-width: 100%;
+    border-radius: 12px;
   }
   
-  /* 输入框和按钮布局 - 保持横向，但优化间距 */
   .input-with-button {
-    gap: 8px;
+    flex-direction: column;
+    gap: 10px;
   }
   
   .question-input {
-    font-size: 16px;
-    padding: 11px 14px;
+    font-size: 16px; /* 避免iOS自动缩放 */
+    padding: 12px 14px;
+    width: 100%;
   }
   
   .btn {
-    padding: 11px 20px;
-    font-size: 15px;
-    white-space: nowrap;
+    width: 100%;
+    justify-content: center;
+    padding: 12px 24px;
+    font-size: 16px;
   }
 
-  .btn-primary:active {
-    transform: scale(0.98);
-    transition: transform 0.1s ease;
+  .result-container {
+    width: 100%;
   }
 
-  /* 卦象展示区 - 保持横向布局和尺寸 */
   .hexagram-display {
+    flex-direction: column;
     gap: 16px;
-    padding: 8px;
-    margin: -8px;
-    margin-bottom: 12px;
+    text-align: center;
+    padding: 10px;
+    margin: -10px;
+    margin-bottom: 14px;
   }
 
-  /* 保持卦象图标大小 */
   .hexagram-image {
     width: 100px;
     height: 100px;
     font-size: 3.5rem;
   }
 
-  /* 卦象信息文字微调 */
+  .hexagram-info {
+    text-align: center;
+    width: 100%;
+  }
+
   .hexagram-name {
-    font-size: 1.25rem;
+    font-size: 1.375rem;
   }
 
   .hexagram-description {
@@ -468,58 +479,35 @@ body {
     padding: 10px 12px;
   }
 
-  /* AI解卦内容 */
+  .ai-interpretation-content {
+    font-size: 0.875rem;
+    padding: 12px;
+  }
+
   .ai-interpretation-title {
     font-size: 1rem;
   }
-
-  .ai-interpretation-content {
-    font-size: 0.875rem;
-    padding: 14px;
-    line-height: 1.6;
-  }
 }
 
-/* 中等屏幕优化 (401px - 768px) */
-@media (min-width: 401px) and (max-width: 768px) {
-  .hexagram-background {
-    opacity: 0.2;
-  }
-
-  .hexagram-item {
-    font-size: 36px;
-  }
-}
-
-/* 超小屏幕适配 (宽度 <= 400px) */
-@media (max-width: 400px) {
+/* 小屏幕手机适配 */
+@media (max-width: 480px) {
   .container {
     padding: 16px 12px;
   }
 
   .question-container {
     padding: 12px;
+    max-width: calc(100vw - 24px);
   }
 
-  .input-with-button {
-    flex-direction: column;
-    gap: 8px;
+  .question-input {
+    font-size: 16px;
+    padding: 10px 12px;
   }
 
   .btn {
-    width: 100%;
-    padding: 11px 20px;
-  }
-
-  .hexagram-display {
-    flex-direction: column;
-    text-align: center;
-    align-items: center;
-  }
-
-  .hexagram-info {
-    text-align: center;
-    width: 100%;
+    padding: 10px 20px;
+    font-size: 15px;
   }
 
   .hexagram-image {
@@ -528,16 +516,18 @@ body {
     font-size: 3rem;
   }
 
-  .hexagram-background {
-    opacity: 0.18;
-  }
-
-  .hexagram-item {
-    font-size: 32px;
-  }
-
   .hexagram-name {
-    font-size: 1.125rem;
+    font-size: 1.25rem;
+  }
+
+  .hexagram-description,
+  .ai-interpretation-content {
+    font-size: 0.8125rem;
+    padding: 10px;
+  }
+
+  .ai-interpretation-title {
+    font-size: 0.9375rem;
   }
 }
 
