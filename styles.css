@@ -7,6 +7,12 @@
   box-sizing: border-box;
 }
 
+html {
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+  scroll-behavior: smooth;
+}
+
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'SF Pro Display', 'PingFang SC', 'Microsoft YaHei', sans-serif;
   padding: 0;
@@ -154,6 +160,9 @@ body {
   color: #ffffff;
   font-family: inherit;
   backdrop-filter: blur(5px);
+  -webkit-appearance: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
 
 .question-input::placeholder {
@@ -189,6 +198,10 @@ body {
   white-space: nowrap;
   flex-shrink: 0;
   line-height: 1.5;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .btn-primary {
@@ -391,61 +404,140 @@ body {
   67%, 100% { content: '正在为您解卦...'; }
 }
 
-/* 响应式设计 */
+/* 响应式设计 - 移动端优化 */
 @media (max-width: 768px) {
+  body {
+    padding: 0;
+  }
+
+  .container {
+    padding: 20px 16px;
+    min-height: 100vh;
+  }
+
+  /* 保持卡片宽度一致性 */
   .question-container {
-    padding: 16px;
-    width: 100%;
+    padding: 14px;
+    width: 720px;
     max-width: calc(100vw - 32px);
   }
   
+  /* 输入框和按钮布局 - 保持横向，但优化间距 */
   .input-with-button {
-    flex-direction: column;
-    gap: 12px;
+    gap: 8px;
   }
   
   .question-input {
-    font-size: 15px;
-    padding: 12px 16px;
+    font-size: 16px;
+    padding: 11px 14px;
   }
   
   .btn {
-    width: 100%;
-    justify-content: center;
-    padding: 12px 24px;
+    padding: 11px 20px;
     font-size: 15px;
+    white-space: nowrap;
   }
 
+  .btn-primary:active {
+    transform: scale(0.98);
+    transition: transform 0.1s ease;
+  }
+
+  /* 卦象展示区 - 保持横向布局和尺寸 */
   .hexagram-display {
-    flex-direction: column;
-    gap: 20px;
-    text-align: center;
-    padding: 10px;
-    margin: -10px;
-    margin-bottom: 14px;
+    gap: 16px;
+    padding: 8px;
+    margin: -8px;
+    margin-bottom: 12px;
   }
 
+  /* 保持卦象图标大小 */
   .hexagram-image {
     width: 100px;
     height: 100px;
     font-size: 3.5rem;
   }
 
-  .hexagram-info {
-    text-align: center;
-  }
-
+  /* 卦象信息文字微调 */
   .hexagram-name {
-    font-size: 1.375rem;
+    font-size: 1.25rem;
   }
 
   .hexagram-description {
     font-size: 0.875rem;
+    padding: 10px 12px;
+  }
+
+  /* AI解卦内容 */
+  .ai-interpretation-title {
+    font-size: 1rem;
   }
 
   .ai-interpretation-content {
     font-size: 0.875rem;
     padding: 14px;
+    line-height: 1.6;
+  }
+}
+
+/* 中等屏幕优化 (401px - 768px) */
+@media (min-width: 401px) and (max-width: 768px) {
+  .hexagram-background {
+    opacity: 0.2;
+  }
+
+  .hexagram-item {
+    font-size: 36px;
+  }
+}
+
+/* 超小屏幕适配 (宽度 <= 400px) */
+@media (max-width: 400px) {
+  .container {
+    padding: 16px 12px;
+  }
+
+  .question-container {
+    padding: 12px;
+  }
+
+  .input-with-button {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .btn {
+    width: 100%;
+    padding: 11px 20px;
+  }
+
+  .hexagram-display {
+    flex-direction: column;
+    text-align: center;
+    align-items: center;
+  }
+
+  .hexagram-info {
+    text-align: center;
+    width: 100%;
+  }
+
+  .hexagram-image {
+    width: 90px;
+    height: 90px;
+    font-size: 3rem;
+  }
+
+  .hexagram-background {
+    opacity: 0.18;
+  }
+
+  .hexagram-item {
+    font-size: 32px;
+  }
+
+  .hexagram-name {
+    font-size: 1.125rem;
   }
 }
 
