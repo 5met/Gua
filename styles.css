@@ -101,20 +101,22 @@ body {
   min-height: 100%;
   padding: 40px 20px;
   width: 100%;
-  transition: justify-content 0.3s ease;
+  transition: justify-content 0.6s cubic-bezier(0.4, 0, 0.2, 1),
+              padding 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* 当结果显示时，容器顶部对齐（仅移动端） */
 @media (max-width: 768px) {
   .container.has-result {
     justify-content: flex-start;
+    padding-top: 40px;
   }
 }
 
 /* 卡片通用样式 - 渐变毛玻璃效果 */
 .liquidGlass-wrapper {
   position: relative;
-  display: flex;
+  display: block;
   overflow: visible;
   background: linear-gradient(135deg, 
     rgba(255, 255, 255, 0.15) 0%, 
@@ -155,11 +157,13 @@ body {
 }
 
 /* 提问框容器 */
-.question-container {
+.question-container,
+.question-container-buddha {
   border-radius: 12px;
   padding: 16px;
   width: 720px;
   max-width: calc(100vw - 40px);
+  margin: 0 auto;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   box-sizing: border-box;
 }
@@ -172,6 +176,7 @@ body {
   width: 100%;
   min-width: 0;
   max-width: 100%;
+  margin-bottom: 12px;
 }
 
 .question-input {
@@ -204,6 +209,49 @@ body {
   border-color: #d4af37;
   box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.2);
   background: rgba(255, 255, 255, 0.15);
+}
+
+/* 快捷问题 */
+.quick-questions {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  width: 100%;
+  margin-bottom: 8px;
+}
+
+.quick-question-btn {
+  padding: 10px 14px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 13px;
+  line-height: 1.4;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: center;
+  font-family: inherit;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.quick-question-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(212, 175, 55, 0.3);
+  color: rgba(255, 255, 255, 0.9);
+  transform: translateY(-1px);
+}
+
+.quick-question-btn:active {
+  transform: translateY(0);
+}
+
+/* 结果显示时隐藏快捷问题 */
+.question-container:has(.result-container.show) .quick-questions,
+.question-container-buddha:has(.buddha-result-container.show) .quick-questions {
+  display: none;
 }
 
 .btn {
@@ -253,22 +301,23 @@ body {
 /* 结果显示区域 */
 .result-container {
   max-height: 0;
-  overflow-x: hidden;
-  overflow-y: hidden;
+  overflow: hidden;
   opacity: 0;
   transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1),
               opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1),
-              margin-top 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+              margin-top 0.5s cubic-bezier(0.4, 0, 0.2, 1);
   margin-top: 0;
   width: 100%;
   min-width: 0;
+  will-change: max-height, opacity, margin-top;
 }
 
 .result-container.show {
-  max-height: 2000px;
+  max-height: 3000px;
   opacity: 1;
   margin-top: 20px;
   overflow: visible;
+  will-change: auto;
 }
 
 /* 结果分隔线 */
@@ -389,6 +438,7 @@ body {
   border-radius: 8px;
   border: 1px solid rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(5px);
+  transition: opacity 0.3s ease;
 }
 
 .ai-loading {
@@ -432,16 +482,31 @@ body {
     padding: 20px 16px;
   }
 
-  .question-container {
+  .question-container,
+  .question-container-buddha {
     padding: 14px;
     width: 100%;
     max-width: 100%;
     border-radius: 12px;
+    margin: 0 auto;
   }
   
   .input-with-button {
     flex-direction: column;
     gap: 10px;
+  }
+
+  .quick-questions {
+    grid-template-columns: 1fr;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+
+  .quick-question-btn {
+    padding: 10px 12px;
+    font-size: 13px;
+    white-space: normal;
+    text-align: left;
   }
   
   .question-input {
@@ -506,9 +571,11 @@ body {
     padding: 16px 12px;
   }
 
-  .question-container {
+  .question-container,
+  .question-container-buddha {
     padding: 12px;
     max-width: calc(100vw - 24px);
+    margin: 0 auto;
   }
 
   .question-input {
@@ -556,4 +623,352 @@ body {
 /* 隐藏SVG滤镜效果（Linear风格不需要） */
 #glass-distortion {
   display: none;
+}
+
+/* 模块选择界面样式 */
+.module-selector {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 40px 20px;
+  opacity: 1;
+  transform: scale(1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.main-title {
+  font-size: 3rem;
+  font-weight: 300;
+  letter-spacing: 0.1em;
+  background: linear-gradient(135deg, #ffffff 0%, rgba(255, 255, 255, 0.7) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 60px;
+  text-align: center;
+  text-shadow: 0 0 30px rgba(255, 255, 255, 0.3);
+}
+
+.module-cards {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 40px;
+  width: 100%;
+  max-width: 800px;
+}
+
+.module-card {
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.1) 0%, 
+    rgba(255, 255, 255, 0.05) 100%);
+  backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 24px;
+  padding: 60px 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3),
+              0 0 0 1px rgba(212, 175, 55, 0.1) inset;
+  position: relative;
+  overflow: hidden;
+}
+
+.module-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, 
+    rgba(212, 175, 55, 0.1) 0%, 
+    transparent 50%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.module-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4),
+              0 0 0 1px rgba(212, 175, 55, 0.3) inset,
+              0 0 40px rgba(212, 175, 55, 0.2);
+  border-color: rgba(212, 175, 55, 0.3);
+}
+
+.module-card:hover::before {
+  opacity: 1;
+}
+
+.module-card:active {
+  transform: translateY(-4px);
+}
+
+.module-card-icon {
+  font-size: 5rem;
+  margin-bottom: 24px;
+  color: #d4af37;
+  text-shadow: 0 0 20px rgba(212, 175, 55, 0.5);
+  transition: all 0.3s ease;
+}
+
+.module-card:hover .module-card-icon {
+  transform: scale(1.1);
+  text-shadow: 0 0 30px rgba(212, 175, 55, 0.8);
+}
+
+.module-card-title {
+  font-size: 2rem;
+  font-weight: 500;
+  color: #ffffff;
+  margin-bottom: 12px;
+  letter-spacing: 0.05em;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.module-card-desc {
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.6);
+  letter-spacing: 0.1em;
+  text-align: center;
+}
+
+/* 模块内容容器 */
+.module-content {
+  width: 100%;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 20px;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.module-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 30px;
+  position: relative;
+}
+
+.back-btn {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  padding: 12px 24px;
+  color: #ffffff;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.back-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(212, 175, 55, 0.4);
+  box-shadow: 0 4px 16px rgba(212, 175, 55, 0.3);
+  transform: translateX(-4px);
+}
+
+.back-btn:active {
+  transform: translateX(-2px);
+}
+
+.module-title {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 2rem;
+  font-weight: 300;
+  letter-spacing: 0.1em;
+  background: linear-gradient(135deg, #ffffff 0%, rgba(255, 255, 255, 0.7) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+}
+
+/* 易经模块特定样式 - 只有返回按钮 */
+.yijing-header {
+  justify-content: flex-start;
+  width: 720px;
+  max-width: calc(100vw - 40px);
+  margin: 0 auto 24px auto;
+}
+
+.yijing-module {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.yijing-module .question-container {
+  width: 720px;
+  max-width: calc(100vw - 40px);
+}
+
+/* 佛祖模块特定样式 */
+.buddha-module {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.buddha-header {
+  justify-content: flex-start;
+  width: 720px;
+  max-width: calc(100vw - 40px);
+  margin: 0 auto 24px auto;
+}
+
+.buddha-module .question-container-buddha {
+  width: 720px;
+  max-width: calc(100vw - 40px);
+}
+
+.buddha-answer {
+  margin-top: 20px;
+  padding-top: 0;
+}
+
+.buddha-answer-title {
+  font-size: 1.25rem;
+  font-weight: 500;
+  color: #ffffff;
+  margin-bottom: 20px;
+  letter-spacing: 0.05em;
+  display: flex;
+  align-items: center;
+  position: relative;
+  padding-left: 20px;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.buddha-answer-title::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 24px;
+  background: linear-gradient(180deg, #d4af37 0%, #f4d03f 100%);
+  border-radius: 2px;
+  box-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+}
+
+.buddha-answer-content {
+  color: rgba(255, 255, 255, 0.9);
+  line-height: 2;
+  font-size: 1rem;
+  letter-spacing: 0.02em;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(5px);
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  transition: opacity 0.3s ease;
+}
+
+/* 响应式适配 - 模块选择界面 */
+@media (max-width: 768px) {
+  .main-title {
+    font-size: 2rem;
+    margin-bottom: 40px;
+  }
+
+  .module-cards {
+    grid-template-columns: 1fr;
+    gap: 24px;
+    max-width: 400px;
+  }
+
+  .module-card {
+    padding: 40px 30px;
+  }
+
+  .module-card-icon {
+    font-size: 4rem;
+  }
+
+  .module-card-title {
+    font-size: 1.5rem;
+  }
+
+  .module-card-desc {
+    font-size: 0.875rem;
+  }
+
+  .module-title {
+    font-size: 1.5rem;
+  }
+
+  .back-btn {
+    padding: 10px 20px;
+    font-size: 0.875rem;
+  }
+
+  .yijing-header,
+  .buddha-header {
+    margin-bottom: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .main-title {
+    font-size: 1.5rem;
+    margin-bottom: 30px;
+  }
+
+  .module-cards {
+    gap: 20px;
+  }
+
+  .module-card {
+    padding: 30px 20px;
+  }
+
+  .module-card-icon {
+    font-size: 3rem;
+    margin-bottom: 16px;
+  }
+
+  .module-card-title {
+    font-size: 1.25rem;
+    margin-bottom: 8px;
+  }
+
+  .module-card-desc {
+    font-size: 0.8125rem;
+  }
+
+  .module-title {
+    font-size: 1.25rem;
+  }
+
+  .back-btn {
+    padding: 8px 16px;
+    font-size: 0.8125rem;
+  }
+
+  .module-header {
+    margin-bottom: 20px;
+  }
+
+  .yijing-header,
+  .buddha-header {
+    margin-bottom: 16px;
+  }
 }

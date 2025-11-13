@@ -6,7 +6,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="format-detection" content="telephone=no">
-    <title>易经起卦</title>
+    <title>灵机问答 - 易经起卦 · 佛祖有理</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -15,6 +15,28 @@
 
     <!-- 主容器 -->
     <div class="container">
+        <!-- 模块选择界面 -->
+        <div class="module-selector" id="moduleSelector">
+            <h1 class="main-title">选择问询方式</h1>
+            <div class="module-cards">
+                <div class="module-card" data-module="yijing">
+                    <div class="module-card-icon">䷀</div>
+                    <div class="module-card-title">易经起卦</div>
+                    <div class="module-card-desc">周易六十四卦·洞察天机</div>
+                </div>
+                <div class="module-card" data-module="buddha">
+                    <div class="module-card-icon">卍</div>
+                    <div class="module-card-title">佛祖有理</div>
+                    <div class="module-card-desc">佛经智慧·指点迷津</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 易经起卦模块 -->
+        <div class="module-content yijing-module" id="yijingModule" style="display: none;">
+            <div class="module-header yijing-header">
+                <button class="back-btn" onclick="backToSelector()">← 返回</button>
+            </div>
         <!-- 提问框卡片 -->
         <div class="liquidGlass-wrapper question-container">
             <div class="liquidGlass-effect"></div>
@@ -26,6 +48,9 @@
                     <input type="text" id="questionInput" class="question-input" placeholder="请输入您的问题...">
                     <button id="sendBtn" class="btn btn-primary">起卦</button>
                 </div>
+
+                <!-- 快捷问题 -->
+                <div class="quick-questions" id="quickQuestions"></div>
 
                 <!-- 结果显示区域（折叠在提问框内） -->
                 <div class="result-container" id="resultContainer">
@@ -44,6 +69,40 @@
                 </div>
             </div>
         </div>
+        </div>
+        <!-- 易经起卦模块结束 -->
+
+        <!-- 佛祖有理模块 -->
+        <div class="module-content buddha-module" id="buddhaModule" style="display: none;">
+            <div class="module-header buddha-header">
+                <button class="back-btn" onclick="backToSelector()">← 返回</button>
+            </div>
+        <!-- 提问框卡片 -->
+        <div class="liquidGlass-wrapper question-container-buddha">
+            <div class="liquidGlass-effect"></div>
+            <div class="liquidGlass-tint"></div>
+            <div class="liquidGlass-shine"></div>
+            <div class="liquidGlass-text">
+                <div class="input-with-button">
+                    <input type="text" class="question-input" id="buddhaQuestionInput" placeholder="请输入您的问题...">
+                    <button class="btn btn-primary" id="buddhaSendBtn">请问佛祖</button>
+                </div>
+
+                <!-- 快捷问题按钮 -->
+                <div class="quick-questions" id="buddhaQuickQuestions"></div>
+
+                <!-- 佛祖解答结果 -->
+                <div class="result-container buddha-result-container" id="buddhaResultContainer">
+                    <div class="result-divider"></div>
+                    <div class="buddha-answer">
+                        <div class="buddha-answer-title">佛祖开示</div>
+                        <div class="buddha-answer-content" id="buddhaAnswerContent"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </div>
+        <!-- 佛祖有理模块结束 -->
     </div>
 
     <script>
@@ -127,12 +186,57 @@
         const hexagramDescription = document.getElementById('hexagramDescription');
         const hexagramBackground = document.getElementById('hexagramBackground');
         const aiInterpretationContent = document.getElementById('aiInterpretationContent');
+        const quickQuestions = document.getElementById('quickQuestions');
 
         // API配置
         let apiKey = 'sk-jitntevrbtbglohuhxidentnldaxkwvwpcwptlbgchodcbhc';
         let currentQuestion = '';
         let currentHexagram = null;
         let flashingInterval = null;
+
+        // 预设问题库
+        const questionBank = [
+            '今年事业运势如何？',
+            '最近财运怎么样？',
+            '这段感情能长久吗？',
+            '适合换工作吗？',
+            '近期健康需要注意什么？',
+            '这次投资会成功吗？',
+            '考试能顺利通过吗？',
+            '何时能遇到良缘？',
+            '创业时机成熟了吗？',
+            '家人平安吗？',
+            '这个决定正确吗？',
+            '能升职加薪吗？',
+            '旅行出行吉利吗？',
+            '买房时机对吗？',
+            '人际关系如何改善？',
+            '今日运势如何？'
+        ];
+
+        // 生成随机快捷问题
+        function generateQuickQuestions() {
+            // 随机选择4个不重复的问题
+            const shuffled = [...questionBank].sort(() => Math.random() - 0.5);
+            const selected = shuffled.slice(0, 4);
+            
+            // 清空现有问题
+            quickQuestions.innerHTML = '';
+            
+            // 创建问题按钮
+            selected.forEach(question => {
+                const btn = document.createElement('div');
+                btn.className = 'quick-question-btn';
+                btn.textContent = question;
+                btn.addEventListener('click', () => {
+                    // 填入问题
+                    questionInput.value = question;
+                    // 直接触发起卦
+                    sendBtn.click();
+                });
+                quickQuestions.appendChild(btn);
+            });
+        }
 
         // 创建64卦背景 - 随机铺满屏幕
         function createHexagramBackground() {
@@ -229,23 +333,36 @@
         }
 
         // 显示卦象和AI解卦结果
-        function showResult(hexagram, aiResult) {
-            // 停止背景闪烁
-            stopFlashing();
-            
-            // 填充卦象信息
-            hexagramImage.textContent = hexagram.symbol;
-            hexagramName.textContent = `${hexagram.name}卦 · ${hexagram.fullName}`;
-            hexagramDescription.textContent = hexagram.description;
-            
-            // 填充AI解卦结果（去除前后空行）
-            aiInterpretationContent.textContent = aiResult.trim();
-            
-            // 显示结果容器
-            resultContainer.classList.add('show');
-            
-            // 移动端：添加has-result类使容器顶部对齐
-            document.querySelector('.container').classList.add('has-result');
+        function showResult(hexagram, aiResult, isAlreadyShown) {
+            // 如果是第一次显示，先填充内容再展开容器
+            if (!isAlreadyShown) {
+                // 先填充所有内容（此时容器还是隐藏的，不会触发重排）
+                hexagramImage.textContent = hexagram.symbol;
+                hexagramName.textContent = `${hexagram.name}卦 · ${hexagram.fullName}`;
+                hexagramDescription.textContent = hexagram.description;
+                aiInterpretationContent.textContent = aiResult.trim();
+                
+                // 停止背景闪烁
+                stopFlashing();
+                
+                // 使用 requestAnimationFrame 确保内容渲染完成
+                requestAnimationFrame(() => {
+                    // 显示结果容器（带平滑过渡动画）
+                    resultContainer.classList.add('show');
+                    
+                    // 等待结果容器动画完成后再调整页面布局（500ms动画 + 100ms缓冲）
+                    setTimeout(() => {
+                        document.querySelector('.container').classList.add('has-result');
+                    }, 600);
+                });
+            } else {
+                // 如果已经显示过，直接更新内容
+                stopFlashing();
+                hexagramImage.textContent = hexagram.symbol;
+                hexagramName.textContent = `${hexagram.name}卦 · ${hexagram.fullName}`;
+                hexagramDescription.textContent = hexagram.description;
+                aiInterpretationContent.textContent = aiResult.trim();
+            }
             
             // 重新启用按钮
             sendBtn.disabled = false;
@@ -327,8 +444,13 @@
             sendBtn.disabled = true;
             sendBtn.textContent = '解卦中...';
 
-            // 重置结果
-            resetResult();
+            // 检查是否已经有结果显示
+            const isResultShown = resultContainer.classList.contains('show');
+
+            // 如果还没有显示过结果，重置；否则只更新内容
+            if (!isResultShown) {
+                resetResult();
+            }
 
             // 立即随机选择一个卦象（不显示）
             const selectedHexagram = selectRandomHexagram();
@@ -337,14 +459,11 @@
             // 开始背景闪烁动画
             startFlashing();
 
-            // 在AI解卦内容区域显示加载动画（提前准备结果容器但不显示）
-            aiInterpretationContent.innerHTML = '<div class="ai-loading"><div class="loading-spinner"></div></div>';
-
             // 调用AI进行解卦（异步，等待结果）
             const aiResult = await getAIInterpretation(question, selectedHexagram);
 
             // AI完成后，显示卦象和解卦结果
-            showResult(selectedHexagram, aiResult);
+            showResult(selectedHexagram, aiResult, isResultShown);
         });
 
         // 回车键发送
@@ -360,8 +479,193 @@
         });
 
         // 初始化
+        // 模块切换功能
+        function showModule(moduleName) {
+            const selector = document.getElementById('moduleSelector');
+            const yijingModule = document.getElementById('yijingModule');
+            const buddhaModule = document.getElementById('buddhaModule');
+            
+            selector.style.opacity = '0';
+            selector.style.transform = 'scale(0.95)';
+            
+            setTimeout(() => {
+                selector.style.display = 'none';
+                
+                if (moduleName === 'yijing') {
+                    yijingModule.style.display = 'block';
+                    setTimeout(() => {
+                        yijingModule.style.opacity = '1';
+                        yijingModule.style.transform = 'translateY(0)';
+                    }, 50);
+                } else if (moduleName === 'buddha') {
+                    buddhaModule.style.display = 'block';
+                    setTimeout(() => {
+                        buddhaModule.style.opacity = '1';
+                        buddhaModule.style.transform = 'translateY(0)';
+                    }, 50);
+                }
+            }, 300);
+        }
+
+        function backToSelector() {
+            const selector = document.getElementById('moduleSelector');
+            const yijingModule = document.getElementById('yijingModule');
+            const buddhaModule = document.getElementById('buddhaModule');
+            
+            // 隐藏当前模块
+            yijingModule.style.opacity = '0';
+            yijingModule.style.transform = 'translateY(20px)';
+            buddhaModule.style.opacity = '0';
+            buddhaModule.style.transform = 'translateY(20px)';
+            
+            setTimeout(() => {
+                yijingModule.style.display = 'none';
+                buddhaModule.style.display = 'none';
+                
+                // 重置状态
+                document.querySelector('.container').classList.remove('has-result');
+                const resultContainer = document.getElementById('resultContainer');
+                resultContainer.classList.remove('show');
+                const buddhaResultContainer = document.getElementById('buddhaResultContainer');
+                buddhaResultContainer.classList.remove('show');
+                
+                // 显示选择器
+                selector.style.display = 'flex';
+                setTimeout(() => {
+                    selector.style.opacity = '1';
+                    selector.style.transform = 'scale(1)';
+                }, 50);
+            }, 300);
+        }
+
+        // 佛祖模块的快捷问题
+        const buddhaQuickQuestions = document.getElementById('buddhaQuickQuestions');
+        const buddhaQuestionBank = [
+            '如何放下执念？',
+            '怎样修得内心平静？',
+            '如何化解烦恼？',
+            '什么是真正的智慧？',
+            '如何面对生活的苦难？',
+            '怎样培养慈悲心？',
+            '如何理解因果？',
+            '什么是真正的幸福？',
+            '如何修行才能开悟？',
+            '怎样处理人际关系？',
+            '如何克服恐惧？',
+            '什么是真正的自由？',
+            '如何面对生死？',
+            '怎样保持正念？',
+            '如何找到人生方向？',
+            '什么是真正的善？'
+        ];
+
+        function generateBuddhaQuickQuestions() {
+            const shuffled = [...buddhaQuestionBank].sort(() => Math.random() - 0.5);
+            const selected = shuffled.slice(0, 4);
+            
+            buddhaQuickQuestions.innerHTML = '';
+            selected.forEach(question => {
+                const btn = document.createElement('div');
+                btn.className = 'quick-question-btn';
+                btn.textContent = question;
+                btn.addEventListener('click', () => {
+                    buddhaQuestionInput.value = question;
+                    buddhaSendBtn.click();
+                });
+                buddhaQuickQuestions.appendChild(btn);
+            });
+        }
+
+        // 佛祖模块的提问功能
+        const buddhaQuestionInput = document.getElementById('buddhaQuestionInput');
+        const buddhaSendBtn = document.getElementById('buddhaSendBtn');
+        const buddhaResultContainer = document.getElementById('buddhaResultContainer');
+        const buddhaAnswerContent = document.getElementById('buddhaAnswerContent');
+
+        buddhaSendBtn.addEventListener('click', async function() {
+            const question = buddhaQuestionInput.value.trim();
+            if (!question) {
+                alert('请输入您的问题');
+                return;
+            }
+
+            // 显示加载状态
+            buddhaSendBtn.disabled = true;
+            buddhaAnswerContent.innerHTML = '<div class="loading-spinner"></div>';
+            
+            // 使用 requestAnimationFrame 确保DOM更新后再显示，避免闪烁
+            requestAnimationFrame(() => {
+                buddhaResultContainer.classList.add('show');
+                
+                // 稍微延迟添加has-result类，让结果先显示
+                setTimeout(() => {
+                    document.querySelector('.container').classList.add('has-result');
+                }, 100);
+            });
+
+            try {
+                // 调用AI API获取佛祖开示
+                const prompt = `你是一位精通佛教十三经的智者。用户问了一个问题："${question}"。请引用佛教十三经（包括《金刚经》《心经》《法华经》《华严经》《楞严经》《维摩诘经》《圆觉经》《楞伽经》《涅槃经》《地藏经》《药师经》《阿弥陀经》《观无量寿经》）中的相关经文，给出智慧的开示。回答应该简洁深刻，字数在150字左右。
+
+直接开始回答：`;
+
+                const response = await fetch('https://api.siliconflow.cn/v1/chat/completions', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${apiKey}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        model: 'Qwen/Qwen3-8B',
+                        messages: [
+                            {
+                                role: 'user',
+                                content: prompt
+                            }
+                        ],
+                        temperature: 0.7,
+                        max_tokens: 300
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error?.message || '请求失败');
+                }
+
+                const data = await response.json();
+                const answer = data.choices[0].message.content;
+
+                // 显示佛祖开示
+                buddhaAnswerContent.textContent = answer.trim();
+
+            } catch (error) {
+                console.error('请问佛祖失败:', error);
+                buddhaAnswerContent.innerHTML = `<p style="color: rgba(255,255,255,0.7);">开示遇到了一些问题：${error.message}<br><br>请稍后再试，或刷新页面重新提问。</p>`;
+            } finally {
+                buddhaSendBtn.disabled = false;
+            }
+        });
+
+        // 回车键提问 - 佛祖模块
+        buddhaQuestionInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !buddhaSendBtn.disabled) {
+                buddhaSendBtn.click();
+            }
+        });
+
         document.addEventListener('DOMContentLoaded', function() {
             createHexagramBackground();
+            generateQuickQuestions();
+            generateBuddhaQuickQuestions();
+
+            // 模块卡片点击事件
+            document.querySelectorAll('.module-card').forEach(card => {
+                card.addEventListener('click', function() {
+                    const module = this.dataset.module;
+                    showModule(module);
+                });
+            });
         });
     </script>
 
