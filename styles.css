@@ -13,7 +13,7 @@ html {
   height: 100%;
   position: fixed;
   overflow: hidden;
-  background: #0f0f14;
+  background-color: #18181f;
 }
 
 /* 防止iOS橡皮筋滚动露出白边 */
@@ -33,8 +33,8 @@ body {
   height: 100%;
   min-height: 100vh;
   min-height: 100dvh;
-  background: #0f0f14;
-  background: linear-gradient(180deg, #0f0f14 0%, #18181f 50%, #1f1f28 100%);
+  background-color: #18181f;
+  background-image: linear-gradient(180deg, #0f0f14 0%, #18181f 50%, #1f1f28 100%);
   background-repeat: no-repeat;
   background-position: center center;
   background-size: 100% 100%;
@@ -112,6 +112,19 @@ body {
   .container.has-result {
     justify-content: flex-start;
     padding-top: 40px;
+    min-height: 100vh;
+  }
+}
+
+/* 确保移动端滚动时背景正确显示 */
+@media (max-width: 768px) {
+  .container {
+    background: transparent;
+  }
+  
+  .hexagram-background {
+    position: fixed;
+    background-color: transparent;
   }
 }
 
@@ -480,43 +493,45 @@ body {
 
 /* 响应式设计 */
 @media (max-width: 768px) {
+  html {
+    background-color: #18181f;
+  }
+  
   body {
     background-attachment: scroll;
-    min-height: 100vh;
+    background-size: 100% 100%;
   }
-
+  
   .container {
     padding: 20px 16px;
-  }
-
-  .module-content {
-    padding: 20px 0;
-    width: 100%;
-    max-width: 100%;
-  }
-
-  .yijing-module,
-  .buddha-module {
-    width: 100%;
-    padding: 0;
-    align-items: stretch;
-  }
-
-  .yijing-header,
-  .buddha-header {
-    width: 100%;
-    max-width: 100%;
-    padding: 0 4px;
-    margin: 0 0 20px 0;
+    min-height: 100vh;
   }
 
   .question-container,
   .question-container-buddha {
     padding: 14px;
-    width: 100%;
-    max-width: 100%;
+    width: 720px;
+    max-width: calc(100vw - 32px);
     border-radius: 12px;
     margin: 0 auto;
+  }
+  
+  .yijing-header,
+  .buddha-header {
+    width: 720px;
+    max-width: calc(100vw - 32px);
+    margin: 0 auto 20px auto;
+  }
+  
+  .module-content {
+    width: 100%;
+    max-width: 100%;
+    padding: 0;
+  }
+  
+  .yijing-module,
+  .buddha-module {
+    width: 100%;
   }
   
   .input-with-button {
@@ -595,28 +610,44 @@ body {
 
 /* 小屏幕手机适配 */
 @media (max-width: 480px) {
+  html {
+    background-color: #18181f;
+  }
+  
+  body {
+    background-attachment: scroll;
+    background-size: 100% 100%;
+  }
+  
   .container {
     padding: 16px 12px;
-  }
-
-  .module-content {
-    padding: 16px 0;
-  }
-
-  .yijing-header,
-  .buddha-header {
-    width: 100%;
-    max-width: 100%;
-    padding: 0 0;
-    margin: 0 0 16px 0;
+    min-height: 100vh;
   }
 
   .question-container,
   .question-container-buddha {
     padding: 12px;
+    width: 720px;
+    max-width: calc(100vw - 24px);
+    margin: 0 auto;
+  }
+  
+  .yijing-header,
+  .buddha-header {
+    width: 720px;
+    max-width: calc(100vw - 24px);
+    margin: 0 auto 16px auto;
+  }
+  
+  .module-content {
     width: 100%;
     max-width: 100%;
-    margin: 0 auto;
+    padding: 0;
+  }
+  
+  .yijing-module,
+  .buddha-module {
+    width: 100%;
   }
 
   .question-input {
@@ -654,12 +685,10 @@ body {
 @supports (-webkit-touch-callout: none) {
   html {
     height: -webkit-fill-available;
-    background: #0f0f14;
   }
   
   body {
     min-height: -webkit-fill-available;
-    background-attachment: scroll;
   }
 }
 
