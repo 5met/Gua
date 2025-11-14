@@ -13,7 +13,11 @@ html {
   height: 100%;
   position: fixed;
   overflow: hidden;
-  background-color: #18181f;
+  background: #18181f;
+  background: linear-gradient(180deg, #0f0f14 0%, #18181f 50%, #1f1f28 100%);
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-size: 100% 100%;
 }
 
 /* 防止iOS橡皮筋滚动露出白边 */
@@ -33,12 +37,11 @@ body {
   height: 100%;
   min-height: 100vh;
   min-height: 100dvh;
-  background-color: #18181f;
-  background-image: linear-gradient(180deg, #0f0f14 0%, #18181f 50%, #1f1f28 100%);
+  background: #18181f;
+  background: linear-gradient(180deg, #0f0f14 0%, #18181f 50%, #1f1f28 100%);
   background-repeat: no-repeat;
   background-position: center center;
   background-size: 100% 100%;
-  background-attachment: fixed;
   overflow-x: hidden;
   overflow-y: auto;
   position: relative;
@@ -103,6 +106,7 @@ body {
   min-height: 100%;
   padding: 40px 20px;
   width: 100%;
+  background: transparent;
   transition: justify-content 0.6s cubic-bezier(0.4, 0, 0.2, 1),
               padding 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -112,19 +116,9 @@ body {
   .container.has-result {
     justify-content: flex-start;
     padding-top: 40px;
-    min-height: 100vh;
-  }
-}
-
-/* 确保移动端滚动时背景正确显示 */
-@media (max-width: 768px) {
-  .container {
     background: transparent;
-  }
-  
-  .hexagram-background {
-    position: fixed;
-    background-color: transparent;
+    min-height: 100vh;
+    min-height: 100dvh;
   }
 }
 
@@ -493,45 +487,52 @@ body {
 
 /* 响应式设计 */
 @media (max-width: 768px) {
-  html {
-    background-color: #18181f;
-  }
-  
-  body {
-    background-attachment: scroll;
-    background-size: 100% 100%;
-  }
-  
   .container {
     padding: 20px 16px;
-    min-height: 100vh;
+    align-items: center;
+  }
+
+  .module-content {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 20px 0;
+    margin: 0;
+    background: transparent;
+  }
+
+  .yijing-module,
+  .buddha-module {
+    width: 100%;
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .yijing-header,
+  .buddha-header {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    margin-bottom: 24px;
   }
 
   .question-container,
   .question-container-buddha {
     padding: 14px;
-    width: 720px;
-    max-width: calc(100vw - 32px);
+    width: 100% !important;
+    max-width: 100% !important;
     border-radius: 12px;
-    margin: 0 auto;
+    margin-left: auto !important;
+    margin-right: auto !important;
   }
-  
-  .yijing-header,
-  .buddha-header {
-    width: 720px;
-    max-width: calc(100vw - 32px);
-    margin: 0 auto 20px auto;
-  }
-  
-  .module-content {
-    width: 100%;
-    max-width: 100%;
-    padding: 0;
-  }
-  
-  .yijing-module,
-  .buddha-module {
-    width: 100%;
+
+  .yijing-module .question-container,
+  .buddha-module .question-container-buddha {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
   }
   
   .input-with-button {
@@ -610,44 +611,51 @@ body {
 
 /* 小屏幕手机适配 */
 @media (max-width: 480px) {
-  html {
-    background-color: #18181f;
-  }
-  
-  body {
-    background-attachment: scroll;
-    background-size: 100% 100%;
-  }
-  
   .container {
     padding: 16px 12px;
-    min-height: 100vh;
+    align-items: center;
+  }
+
+  .module-content {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 16px 0;
+    margin: 0;
+    background: transparent;
+  }
+
+  .yijing-module,
+  .buddha-module {
+    width: 100%;
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .yijing-header,
+  .buddha-header {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    margin-bottom: 20px;
   }
 
   .question-container,
   .question-container-buddha {
     padding: 12px;
-    width: 720px;
-    max-width: calc(100vw - 24px);
-    margin: 0 auto;
+    width: 100% !important;
+    max-width: calc(100vw - 24px) !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
   }
-  
-  .yijing-header,
-  .buddha-header {
-    width: 720px;
-    max-width: calc(100vw - 24px);
-    margin: 0 auto 16px auto;
-  }
-  
-  .module-content {
-    width: 100%;
-    max-width: 100%;
-    padding: 0;
-  }
-  
-  .yijing-module,
-  .buddha-module {
-    width: 100%;
+
+  .yijing-module .question-container,
+  .buddha-module .question-container-buddha {
+    width: 100% !important;
+    max-width: calc(100vw - 24px) !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
   }
 
   .question-input {
@@ -685,10 +693,20 @@ body {
 @supports (-webkit-touch-callout: none) {
   html {
     height: -webkit-fill-available;
+    background: #18181f;
+    background: linear-gradient(180deg, #0f0f14 0%, #18181f 50%, #1f1f28 100%);
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: 100% 100%;
   }
   
   body {
     min-height: -webkit-fill-available;
+    background: #18181f;
+    background: linear-gradient(180deg, #0f0f14 0%, #18181f 50%, #1f1f28 100%);
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: 100% 100%;
   }
 }
 
