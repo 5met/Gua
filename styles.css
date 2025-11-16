@@ -96,6 +96,48 @@ body {
   }
 }
 
+/* 心经背景 */
+.heart-sutra-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  opacity: 0.25;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.heart-sutra-item {
+  position: absolute;
+  color: #d4af37;
+  text-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
+  transition: all 0.3s ease;
+  white-space: nowrap;
+  font-family: 'PingFang SC', 'Microsoft YaHei', serif;
+}
+
+.heart-sutra-item.flashing {
+  animation: heartSutraBreathe 3s ease-in-out infinite;
+  opacity: 1;
+}
+
+@keyframes heartSutraBreathe {
+  0%, 100% { 
+    opacity: 0.2; 
+    transform: scale(1); 
+    color: #d4af37;
+    text-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
+  }
+  50% { 
+    opacity: 0.8; 
+    transform: scale(1.1); 
+    color: #ffd700;
+    text-shadow: 0 0 25px rgba(255, 215, 0, 0.7), 0 0 35px rgba(255, 215, 0, 0.4);
+  }
+}
+
 /* 主容器 */
 .container {
   position: relative;

@@ -12,12 +12,13 @@
 <body>
     <!-- 64卦背景 -->
     <div class="hexagram-background" id="hexagramBackground"></div>
+    <!-- 心经背景 -->
+    <div class="heart-sutra-background" id="heartSutraBackground"></div>
 
     <!-- 主容器 -->
     <div class="container">
         <!-- 模块选择界面 -->
         <div class="module-selector" id="moduleSelector">
-            <h1 class="main-title">选择问询方式</h1>
             <div class="module-cards">
                 <div class="module-card" data-module="yijing">
                     <div class="module-card-icon">䷀</div>
@@ -193,6 +194,63 @@
         let currentQuestion = '';
         let currentHexagram = null;
         let flashingInterval = null;
+        let heartSutraFlashingInterval = null;
+        
+        // 心经语句数组
+        const heartSutraPhrases = [
+            '观自在菩萨',
+            '行深般若波罗蜜多时',
+            '照见五蕴皆空',
+            '度一切苦厄',
+            '舍利子',
+            '色不异空',
+            '空不异色',
+            '色即是空',
+            '空即是色',
+            '受想行识',
+            '亦复如是',
+            '舍利子',
+            '是诸法空相',
+            '不生不灭',
+            '不垢不净',
+            '不增不减',
+            '是故空中无色',
+            '无受想行识',
+            '无眼耳鼻舌身意',
+            '无色声香味触法',
+            '无眼界',
+            '乃至无意识界',
+            '无无明',
+            '亦无无明尽',
+            '乃至无老死',
+            '亦无老死尽',
+            '无苦集灭道',
+            '无智亦无得',
+            '以无所得故',
+            '菩提萨埵',
+            '依般若波罗蜜多故',
+            '心无挂碍',
+            '无挂碍故',
+            '无有恐怖',
+            '远离颠倒梦想',
+            '究竟涅槃',
+            '三世诸佛',
+            '依般若波罗蜜多故',
+            '得阿耨多罗三藐三菩提',
+            '故知般若波罗蜜多',
+            '是大神咒',
+            '是大明咒',
+            '是无上咒',
+            '是无等等咒',
+            '能除一切苦',
+            '真实不虚',
+            '故说般若波罗蜜多咒',
+            '即说咒曰',
+            '揭谛揭谛',
+            '波罗揭谛',
+            '波罗僧揭谛',
+            '菩提萨婆诃'
+        ];
 
         // 预设问题库
         const questionBank = [
@@ -325,6 +383,101 @@
                 });
             }
         }
+        
+        // 创建心经背景
+        const heartSutraBackground = document.getElementById('heartSutraBackground');
+        function createHeartSutraBackground() {
+            heartSutraBackground.innerHTML = '';
+            
+            // 计算屏幕尺寸
+            const screenWidth = window.innerWidth;
+            const screenHeight = window.innerHeight;
+            
+            // 计算需要的语句数量（铺满屏幕，确保不重叠）
+            const itemSize = 100;
+            const cols = Math.ceil(screenWidth / itemSize) + 2;
+            const rows = Math.ceil(screenHeight / itemSize) + 2;
+            const totalItems = cols * rows;
+            
+            // 创建语句数组，循环使用心经语句直到铺满屏幕
+            const phraseArray = [];
+            for (let i = 0; i < totalItems; i++) {
+                phraseArray.push(heartSutraPhrases[i % heartSutraPhrases.length]);
+            }
+            
+            // 随机打乱数组
+            for (let i = phraseArray.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [phraseArray[i], phraseArray[j]] = [phraseArray[j], phraseArray[i]];
+            }
+            
+            // 创建语句元素
+            for (let i = 0; i < totalItems; i++) {
+                const phraseItem = document.createElement('div');
+                phraseItem.className = 'heart-sutra-item';
+                
+                // 随机位置（减小偏移范围，避免重叠）
+                const colIndex = i % cols;
+                const rowIndex = Math.floor(i / cols);
+                const x = colIndex * itemSize + Math.random() * 20 - 10;
+                const y = rowIndex * itemSize + Math.random() * 20 - 10;
+                
+                phraseItem.style.left = x + 'px';
+                phraseItem.style.top = y + 'px';
+                
+                // 不旋转，保持横向显示
+                phraseItem.style.transform = 'none';
+                
+                // 随机透明度
+                const opacity = 0.15 + Math.random() * 0.25;
+                phraseItem.style.opacity = opacity;
+                
+                // 随机字体大小（减小字号范围）
+                const fontSize = 12 + Math.random() * 4;
+                phraseItem.style.fontSize = fontSize + 'px';
+                
+                // 设置语句文本
+                phraseItem.textContent = phraseArray[i];
+                
+                heartSutraBackground.appendChild(phraseItem);
+            }
+        }
+        
+        // 开始心经背景闪烁效果
+        function startHeartSutraFlashing() {
+            const items = document.querySelectorAll('.heart-sutra-item');
+            // 初始随机选择一些语句开始闪烁
+            items.forEach(item => {
+                if (Math.random() < 0.4) {
+                    item.classList.add('flashing');
+                }
+            });
+            // 定期更新闪烁的语句，但间隔更长，让呼吸感更自然
+            heartSutraFlashingInterval = setInterval(() => {
+                items.forEach(item => {
+                    if (Math.random() < 0.15) {
+                        // 随机切换闪烁状态
+                        if (item.classList.contains('flashing')) {
+                            item.classList.remove('flashing');
+                        } else {
+                            item.classList.add('flashing');
+                        }
+                    }
+                });
+            }, 1500);
+        }
+        
+        // 停止心经背景闪烁效果
+        function stopHeartSutraFlashing() {
+            if (heartSutraFlashingInterval) {
+                clearInterval(heartSutraFlashingInterval);
+                heartSutraFlashingInterval = null;
+                const items = document.querySelectorAll('.heart-sutra-item');
+                items.forEach(item => {
+                    item.classList.remove('flashing');
+                });
+            }
+        }
 
         // 随机选择一个卦象（不显示）
         function selectRandomHexagram() {
@@ -444,6 +597,10 @@
             sendBtn.disabled = true;
             sendBtn.textContent = '解卦中...';
 
+            // 记录开始时间（用于控制最少5秒间隔）
+            const startTime = Date.now();
+            const minDelay = 5000; // 最少5秒
+
             // 检查是否已经有结果显示
             const isResultShown = resultContainer.classList.contains('show');
 
@@ -462,6 +619,15 @@
             // 调用AI进行解卦（异步，等待结果）
             const aiResult = await getAIInterpretation(question, selectedHexagram);
 
+            // 计算已经过去的时间
+            const elapsedTime = Date.now() - startTime;
+            const remainingTime = Math.max(0, minDelay - elapsedTime);
+
+            // 如果不足5秒，延迟显示
+            if (remainingTime > 0) {
+                await new Promise(resolve => setTimeout(resolve, remainingTime));
+            }
+
             // AI完成后，显示卦象和解卦结果
             showResult(selectedHexagram, aiResult, isResultShown);
         });
@@ -475,7 +641,13 @@
 
         // 窗口大小变化时重新布局
         window.addEventListener('resize', function() {
-            createHexagramBackground();
+            // 根据当前显示的模块重新创建背景
+            if (hexagramBackground.style.display !== 'none') {
+                createHexagramBackground();
+            }
+            if (heartSutraBackground.style.display !== 'none') {
+                createHeartSutraBackground();
+            }
         });
 
         // 初始化
@@ -492,12 +664,22 @@
                 selector.style.display = 'none';
                 
                 if (moduleName === 'yijing') {
+                    // 显示卦象背景，隐藏心经背景
+                    hexagramBackground.style.display = 'block';
+                    heartSutraBackground.style.display = 'none';
+                    // 创建卦象背景
+                    createHexagramBackground();
                     yijingModule.style.display = 'block';
                     setTimeout(() => {
                         yijingModule.style.opacity = '1';
                         yijingModule.style.transform = 'translateY(0)';
                     }, 50);
                 } else if (moduleName === 'buddha') {
+                    // 隐藏卦象背景，显示心经背景
+                    hexagramBackground.style.display = 'none';
+                    heartSutraBackground.style.display = 'block';
+                    // 创建心经背景
+                    createHeartSutraBackground();
                     buddhaModule.style.display = 'block';
                     setTimeout(() => {
                         buddhaModule.style.opacity = '1';
@@ -518,9 +700,17 @@
             buddhaModule.style.opacity = '0';
             buddhaModule.style.transform = 'translateY(20px)';
             
+            // 停止所有闪烁效果
+            stopFlashing();
+            stopHeartSutraFlashing();
+            
             setTimeout(() => {
                 yijingModule.style.display = 'none';
                 buddhaModule.style.display = 'none';
+                
+                // 隐藏所有背景（首页不显示背景）
+                hexagramBackground.style.display = 'none';
+                heartSutraBackground.style.display = 'none';
                 
                 // 重置状态
                 document.querySelector('.container').classList.remove('has-result');
@@ -589,9 +779,16 @@
                 return;
             }
 
+            // 记录开始时间（用于控制最少5秒间隔）
+            const startTime = Date.now();
+            const minDelay = 5000; // 最少5秒
+
             // 显示加载状态
             buddhaSendBtn.disabled = true;
             buddhaAnswerContent.innerHTML = '<div class="loading-spinner"></div>';
+            
+            // 开始心经背景闪烁动画
+            startHeartSutraFlashing();
             
             // 使用 requestAnimationFrame 确保DOM更新后再显示，避免闪烁
             requestAnimationFrame(() => {
@@ -636,11 +833,25 @@
                 const data = await response.json();
                 const answer = data.choices[0].message.content;
 
+                // 计算已经过去的时间
+                const elapsedTime = Date.now() - startTime;
+                const remainingTime = Math.max(0, minDelay - elapsedTime);
+
+                // 如果不足5秒，延迟显示
+                if (remainingTime > 0) {
+                    await new Promise(resolve => setTimeout(resolve, remainingTime));
+                }
+
+                // 停止心经背景闪烁
+                stopHeartSutraFlashing();
+
                 // 显示佛祖开示
                 buddhaAnswerContent.textContent = answer.trim();
 
             } catch (error) {
                 console.error('请问佛祖失败:', error);
+                // 停止心经背景闪烁
+                stopHeartSutraFlashing();
                 buddhaAnswerContent.innerHTML = `<p style="color: rgba(255,255,255,0.7);">开示遇到了一些问题：${error.message}<br><br>请稍后再试，或刷新页面重新提问。</p>`;
             } finally {
                 buddhaSendBtn.disabled = false;
@@ -655,7 +866,10 @@
         });
 
         document.addEventListener('DOMContentLoaded', function() {
-            createHexagramBackground();
+            // 首页不显示背景
+            hexagramBackground.style.display = 'none';
+            heartSutraBackground.style.display = 'none';
+            
             generateQuickQuestions();
             generateBuddhaQuickQuestions();
 
