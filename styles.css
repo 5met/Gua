@@ -550,16 +550,20 @@ body {
   .buddha-header {
     width: 100%;
     max-width: 100%;
-    padding: 0 20px;
+    padding: 0;
     margin: 0 auto 24px auto;
     box-sizing: border-box;
+  }
+
+  .back-btn {
+    margin-left: 16px;
   }
 
   .question-container,
   .question-container-buddha {
     padding: 14px;
-    width: calc(100% - 40px) !important;
-    max-width: calc(100% - 40px) !important;
+    width: calc(100% - 32px) !important;
+    max-width: calc(100% - 32px) !important;
     border-radius: 12px;
     margin: 0 auto !important;
     box-sizing: border-box;
@@ -567,8 +571,8 @@ body {
 
   .yijing-module .question-container,
   .buddha-module .question-container-buddha {
-    width: calc(100% - 40px) !important;
-    max-width: calc(100% - 40px) !important;
+    width: calc(100% - 32px) !important;
+    max-width: calc(100% - 32px) !important;
     margin: 0 auto !important;
   }
   
@@ -705,16 +709,20 @@ body {
   .buddha-header {
     width: 100%;
     max-width: 100%;
-    padding: 0 16px;
+    padding: 0;
     margin: 0 auto 20px auto;
     box-sizing: border-box;
+  }
+
+  .back-btn {
+    margin-left: 12px;
   }
 
   .question-container,
   .question-container-buddha {
     padding: 12px;
-    width: calc(100% - 32px) !important;
-    max-width: calc(100% - 32px) !important;
+    width: calc(100% - 24px) !important;
+    max-width: calc(100% - 24px) !important;
     border-radius: 12px;
     margin: 0 auto !important;
     box-sizing: border-box;
@@ -722,8 +730,8 @@ body {
 
   .yijing-module .question-container,
   .buddha-module .question-container-buddha {
-    width: calc(100% - 32px) !important;
-    max-width: calc(100% - 32px) !important;
+    width: calc(100% - 24px) !important;
+    max-width: calc(100% - 24px) !important;
     margin: 0 auto !important;
   }
 
